@@ -1,8 +1,8 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
-import {APIRoute} from '../src/routes/api';
-import {OrderRoute} from '../src/routes/order';
-import {UserRoute} from '../src/routes/user';
+import {APIRoute} from './routes/api';
+import {OrderRoute} from './routes/order';
+import {UserRoute} from './routes/user';
 
 class App {
     public app: express.Application;

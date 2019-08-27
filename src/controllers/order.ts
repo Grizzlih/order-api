@@ -11,7 +11,7 @@ export let getOrder = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const order = orders.find(obj => obj.id === Number(id));
     const httpStatusCode = order ? 200 : 404;
-    return formatOutput(res, order, httpStatusCode);
+    return formatOutput(res, order, httpStatusCode, 'order');
 };
 
 export let getAllOrders = (req: Request, res: Response, next: NextFunction) => {
@@ -23,7 +23,7 @@ export let getAllOrders = (req: Request, res: Response, next: NextFunction) => {
         .take(limit)
         .value();
 
-    return formatOutput(res, filteredOrders, 200);
+    return formatOutput(res, filteredOrders, 200, 'order');
 };
 
 export let addOrder = (req: Request, res: Response, next: NextFunction) => {
@@ -62,5 +62,5 @@ export let getInventory = (req: Request, res: Response, next: NextFunction) => {
 
     const grouppedOrders = _.groupBy(inventoryOrders, 'userId');
 
-    return formatOutput(res, grouppedOrders, 200);
+    return formatOutput(res, grouppedOrders, 200, 'inventory');
 };

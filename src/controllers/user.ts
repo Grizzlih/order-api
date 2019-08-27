@@ -9,7 +9,7 @@ export let getUser = (req: Request, res: Response, next: NextFunction) => {
     const username = req.params.username;
     const user = users.find(obj => obj.username === username);
     const httpStatusCode = user ? 200 : 404;
-    return formatOutput(res, user, httpStatusCode);
+    return formatOutput(res, user, httpStatusCode, 'user');
 };
 
 export let addUser = (req: Request, res: Response, next: NextFunction) => {
@@ -24,7 +24,7 @@ export let addUser = (req: Request, res: Response, next: NextFunction) => {
         username: req.body.username,
     };
     users.push(user);
-    return formatOutput(res, user, 201);
+    return formatOutput(res, user, 201, 'user');
 };
 
 export let updateUser = (req: Request, res: Response, next: NextFunction) => {
