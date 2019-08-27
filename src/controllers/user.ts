@@ -9,7 +9,7 @@ export let getUser = (req: Request, res: Response, next: NextFunction) => {
     const username = req.params.username;
     const user = users.find(obj => obj.username === username);
     const httpStatusCode = user ? 200 : 404;
-    return formatOutput(res, user, httpStatusCode, ApplicationType.JSON);
+    return formatOutput(res, user, httpStatusCode);
 };
 
 export let addUser = (req: Request, res: Response, next: NextFunction) => {
@@ -24,7 +24,7 @@ export let addUser = (req: Request, res: Response, next: NextFunction) => {
         username: req.body.username,
     };
     users.push(user);
-    return formatOutput(res, user, 201, ApplicationType.JSON);
+    return formatOutput(res, user, 201);
 };
 
 export let updateUser = (req: Request, res: Response, next: NextFunction) => {
@@ -45,7 +45,7 @@ export let updateUser = (req: Request, res: Response, next: NextFunction) => {
     user.userStatus = req.body.userStatus || user.userStatus;
 
     users[userIndex] = user;
-    return formatOutput(res, {}, 204, ApplicationType.JSON);
+    return formatOutput(res, {}, 204);
 };
 
 export let removeUser = (req: Request, res: Response, next: NextFunction) => {
@@ -58,5 +58,5 @@ export let removeUser = (req: Request, res: Response, next: NextFunction) => {
 
     users = users.filter(item => item.username !== username);
 
-    return formatOutput(res, {}, 204, ApplicationType.JSON);
+    return formatOutput(res, {}, 204);
 };

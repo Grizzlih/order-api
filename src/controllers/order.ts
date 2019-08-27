@@ -11,7 +11,7 @@ export let getOrder = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const order = orders.find(obj => obj.id === Number(id));
     const httpStatusCode = order ? 200 : 404;
-    return formatOutput(res, order, httpStatusCode, ApplicationType.JSON);
+    return formatOutput(res, order, httpStatusCode);
 };
 
 export let getAllOrders = (req: Request, res: Response, next: NextFunction) => {
@@ -23,7 +23,7 @@ export let getAllOrders = (req: Request, res: Response, next: NextFunction) => {
         .take(limit)
         .value();
 
-    return formatOutput(res, filteredOrders, 200, ApplicationType.JSON);
+    return formatOutput(res, filteredOrders, 200);
 };
 
 export let addOrder = (req: Request, res: Response, next: NextFunction) => {
@@ -37,7 +37,7 @@ export let addOrder = (req: Request, res: Response, next: NextFunction) => {
     };
     orders.push(order);
 
-    return formatOutput(res, order, 201, ApplicationType.JSON);
+    return formatOutput(res, order, 201);
 };
 
 export let removeOrder = (req: Request, res: Response, next: NextFunction) => {
@@ -50,7 +50,7 @@ export let removeOrder = (req: Request, res: Response, next: NextFunction) => {
 
     orders = orders.filter(item => item.id !== id);
 
-    return formatOutput(res, {}, 204, ApplicationType.JSON);
+    return formatOutput(res, {}, 204);
 };
 
 export let getInventory = (req: Request, res: Response, next: NextFunction) => {
@@ -62,5 +62,5 @@ export let getInventory = (req: Request, res: Response, next: NextFunction) => {
 
     const grouppedOrders = _.groupBy(inventoryOrders, 'userId');
 
-    return formatOutput(res, grouppedOrders, 200, ApplicationType.JSON);
+    return formatOutput(res, grouppedOrders, 200);
 };
