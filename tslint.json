@@ -1,6 +1,9 @@
 {
     "extends": ["tslint:recommended", "tslint-config-prettier"],
     "rules": {
+      "quotemark": [true, "single"],
+      "indent": [true, "spaces", 4],
+      "no-trailing-whitespace": true,
       "array-type": [true, "generic"],
       "no-string-literal": false,
       "object-literal-shorthand": [true, "never"],
