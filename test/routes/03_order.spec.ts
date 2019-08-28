@@ -24,7 +24,7 @@ let orderIdCreated;
 describe('orderRoute', () => {
     before(async () => {
         expect(OrderModel.modelName).to.be.equal('Order');
-        await OrderModel.collection.drop();
+        await OrderModel.collection.deleteMany({});
     });
     it('should respond HTTP 404 status because there is no order', async () => {
         return chai

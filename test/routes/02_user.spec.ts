@@ -23,7 +23,7 @@ const user = {
 describe('userRoute', () => {
     before(async () => {
         expect(UserModel.modelName).to.be.equal('User');
-        await UserModel.collection.drop();
+        await UserModel.collection.deleteMany({});
     });
     it('should respond with HTTP 404 status because there is no user', async () => {
         return chai
