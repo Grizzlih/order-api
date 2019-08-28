@@ -6,7 +6,6 @@
       "no-trailing-whitespace": true,
       "array-type": [true, "generic"],
       "no-string-literal": false,
-      "object-literal-shorthand": [true, "never"],
       "only-arrow-functions": true,
       "interface-name": false,
       "max-classes-per-file": false,

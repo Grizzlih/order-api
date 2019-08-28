@@ -1,83 +1,78 @@
 import {NextFunction, Request, Response} from 'express';
 import * as halson from 'halson';
 import * as _ from 'lodash';
-import {ApplicationType} from '../models/applicationType';
-import {default as Order} from '../models/order';
-import {OrderStatus} from '../models/orderStatus';
+import {OrderModel} from '../schemas/order';
+import {UserModel} from '../schemas/user';
 import {formatOutput} from '../utility/orderApiUtility';
-
-let orders: Array<Order> = [];
 
 export let getOrder = (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    let order = orders.find(obj => obj.id === Number(id));
-    const httpStatusCode = order ? 200 : 404;
-    if (order) {
-        order = halson(order).addLink('self', `/store/orders/${order.id}`);
-    }
-    return formatOutput(res, order, httpStatusCode, 'order');
+    OrderModel.findById(id, (err, order) => {
+        if (!order) {
+            return res.status(404).send();
+        }
+        order = halson(order.toJSON()).addLink('self', `/store/orders/${order.id}`);
+        return formatOutput(res, order, 200, 'order');
+    });
 };
 
 export let getAllOrders = (req: Request, res: Response, next: NextFunction) => {
-    const limit = req.query.limit || orders.length;
-    const offset = req.query.offset || 0;
+    const limit = Number(req.query.limit) || 0;
+    const offset = Number(req.query.offset) || 0;
 
-    let filteredOrders = _(orders)
-        .drop(offset)
-        .take(limit)
-        .value();
-
-    filteredOrders = filteredOrders.map(order => {
-        return halson(order)
-            .addLink('self', `/store/orders/${order.id}`)
-            .addLink('user', {
-                href: `/users/${order.userId}`,
+    OrderModel.find({}, null, {skip: offset, limit}, (err, orders) => {
+        if (orders) {
+            orders = orders.map(order => {
+                return halson(order.toJSON())
+                    .addLink('self', `/store/orders/${order.id}`)
+                    .addLink('user', {
+                        href: `/users/${order.userId}`,
+                    });
             });
+        }
+        return formatOutput(res, orders, 200, 'order');
     });
-
-    return formatOutput(res, filteredOrders, 200, 'order');
 };
 
 export let addOrder = (req: Request, res: Response, next: NextFunction) => {
-    let order: Order = {
-        complete: false,
-        id: Math.floor(Math.random() * 100) + 1,
-        quantity: req.body.quantity,
-        shipDate: req.body.shipDate,
-        status: OrderStatus.Placed,
-        userId: req.body.userId,
-    };
-    orders.push(order);
-    order = halson(order)
-        .addLink('self', `/store/orders/${order.id}`)
-        .addLink('user', {
-            href: `/users/${order.userId}`,
-        });
+    const userId = req.body.userId;
 
-    return formatOutput(res, order, 201);
+    UserModel.findById(userId, (err, user) => {
+        if (!user) {
+            return res.status(404).send();
+        }
+
+        const newOrder = new OrderModel(req.body);
+
+        newOrder.save((error, order) => {
+            order = halson(order.toJSON())
+                .addLink('self', `/store/orders/${order._id}`)
+                .addLink('user', {
+                    href: `/users/${order.userId}`,
+                });
+
+            return formatOutput(res, order, 201, 'order');
+        });
+    });
 };
 
 export let removeOrder = (req: Request, res: Response, next: NextFunction) => {
-    const id = Number(req.params.id);
-    const orderIndex = orders.findIndex(item => item.id === id);
+    const id = req.params.id;
 
-    if (orderIndex === -1) {
-        return res.status(404).send();
-    }
-
-    orders = orders.filter(item => item.id !== id);
-
-    return formatOutput(res, {}, 204);
+    OrderModel.findById(id, (err, order) => {
+        if (!order) {
+            return res.status(404).send();
+        }
+        order.remove(() => {
+            res.status(204).send();
+        });
+    });
 };
 
 export let getInventory = (req: Request, res: Response, next: NextFunction) => {
     const status = req.query.status;
-    let inventoryOrders = orders;
-    if (status) {
-        inventoryOrders = inventoryOrders.filter(item => item.status === status);
-    }
-
-    const grouppedOrders = _.groupBy(inventoryOrders, 'userId');
-
-    return formatOutput(res, grouppedOrders, 200, 'inventory');
+    OrderModel.find({status}, (err, orders) => {
+        orders = _.groupBy(orders, 'userId');
+        return formatOutput(res, orders, 200, 'inventory');
+    });
 };

@@ -4,15 +4,14 @@ import * as chai from 'chai';
 import chaiHttp = require('chai-http');
 import 'mocha';
 import app from '../../src/app';
-import Order from '../../src/models/order';
 import {OrderStatus} from '../../src/models/orderStatus';
+import {OrderModel} from '../../src/schemas/order';
 
 chai.use(chaiHttp);
 
 const expect = chai.expect;
 
-const order: Order = {
-    id: 1,
+const order = {
     userId: 20,
     quantity: 1,
     shipDate: new Date(),
@@ -20,13 +19,39 @@ const order: Order = {
     complete: false,
 };
 
+let orderIdCreated;
+
 describe('orderRoute', () => {
+    before(async () => {
+        expect(OrderModel.modelName).to.be.equal('Order');
+        await OrderModel.collection.drop();
+    });
     it('should respond HTTP 404 status because there is no order', async () => {
         return chai
             .request(app)
-            .get(`/store/orders/${order.id}`)
+            .get(`/store/orders/000`)
             .then(res => {
                 expect(res.status).to.be.equal(404);
+            });
+    });
+    it('should create a new user for Order tests and retrieve it back', async () => {
+        const user = {
+            username: 'OrderUser',
+            firstName: 'Order',
+            lastName: 'User',
+            email: 'order@myemail.com',
+            password: 'password',
+            phone: '5555555',
+            userStatus: 1,
+        };
+        return chai
+            .request(app)
+            .post('/users')
+            .send(user)
+            .then(res => {
+                expect(res.status).to.be.equal(201);
+                expect(res.body.username).to.be.equal(user.username);
+                order.userId = res.body._id;
             });
     });
     it('should create a new order and retreive it back', async () => {
@@ -38,16 +63,16 @@ describe('orderRoute', () => {
                 expect(res.status).to.be.equal(201);
                 expect(res.body.userId).to.be.equal(order.userId);
                 expect(res.body.complete).to.be.equal(false);
-                order.id = res.body.id;
+                orderIdCreated = res.body._id;
             });
     });
     it('should return the order created on the step before', async () => {
         return chai
             .request(app)
-            .get(`/store/orders/${order.id}`)
+            .get(`/store/orders/${orderIdCreated}`)
             .then(res => {
                 expect(res.status).to.be.equal(200);
-                expect(res.body.id).to.be.equal(order.id);
+                expect(res.body._id).to.be.equal(orderIdCreated);
                 expect(res.body.status).to.be.equal(order.status);
             });
     });
@@ -72,16 +97,16 @@ describe('orderRoute', () => {
     it('should return the inventory for all users', async () => {
         return chai
             .request(app)
-            .get(`/store/inventory`)
+            .get(`/store/inventory?status=PLACED`)
             .then(res => {
                 expect(res.status).to.be.equal(200);
-                expect(res.body[20].length).to.be.equal(1);
+                expect(res.body[order.userId].length).to.be.equal(1);
             });
     });
     it('should remove an existing order', async () => {
         return chai
             .request(app)
-            .del(`/store/orders/${order.id}`)
+            .del(`/store/orders/${orderIdCreated}`)
             .then(res => {
                 expect(res.status).to.be.equal(204);
             });
@@ -89,7 +114,7 @@ describe('orderRoute', () => {
     it('should return 404 when it is trying to remove an order because the order does not exist', async () => {
         return chai
             .request(app)
-            .del(`/store/orders/${order.id}`)
+            .del(`/store/orders/${orderIdCreated}`)
             .then(res => {
                 expect(res.status).to.be.equal(404);
             });
