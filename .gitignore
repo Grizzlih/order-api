@@ -4,3 +4,4 @@ reports
 dist
 .DS_STORE
 .stryker-tmp
+stryker.log
