@@ -25,7 +25,7 @@ class App {
     private mongoSetup(): void {
         mongoose.connect(
             this.mongoUrl,
-            { useNewUrlParser: true }
+            {useNewUrlParser: true}
         );
     }
 }
